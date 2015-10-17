@@ -92,6 +92,7 @@ function radialProgress(parent) {
 
 
             _arc.endAngle(_currentArc);
+            _arc2.endAngle(_currentArc2);
             enter.append("g").attr("class", "arcs");
             var path = svg.select(".arcs").selectAll(".arc").data(data);
             path.enter().append("path")
@@ -106,26 +107,43 @@ function radialProgress(parent) {
                 .attr("transform", "translate(" + _width/2 + "," + _width/2 + ")")
                 .attr("d", _arc2);
 
+            background.append("path")
+                .attr("class","path2")
+                .attr("transform", "translate(" + ( _width/2 )*.1 + "," + ( _width/2 )*.1 + ")")
+                .attr("d", _arc2);
+
+            background.append("path")
+                .attr("transform", "translate(" + _width/2 + "," + _width/2 + ")")
+                .attr("d", _arc2);
 
             enter.append("g").attr("class", "labels");
             var label = svg.select(".labels").selectAll(".label").data(data);
             label.enter().append("text")
                 .attr("class","label")
-                .attr("y",_width/2+_fontSize/3)
+                .attr("y",_width/1.5+_fontSize/5)
                 .attr("x",_width/2)
                 .attr("width",_width)
                 // .attr("x",(3*_fontSize/2))
-                .text(function (d) { return Math.round((_value-_minValue)/(_maxValue-_minValue)*100) + "%" })
+                .text(function (d) { return Math.round((_value[0]-_minValue)/(_maxValue-_minValue)*100) + "%" })
+                .style("font-size",_fontSize+"px");
+
+            var label2 = svg.select(".labels").selectAll(".label").data(data);
+            label.enter().append("text")
+                .attr("class","label")
+                .attr("y",(_width/1.5+_fontSize/5)*.6)
+                .attr("x",_width/2)
+                .attr("width",_width)
+                // .attr("x",(3*_fontSize/2))
+                .text(function (d) { return Math.round((_value[0]-_minValue)/(_maxValue-_minValue)*100) + "%" })
                 .style("font-size",_fontSize+"px");
 
             path.exit().transition().duration(500).attr("x",1000).remove();
-
 
             layout(svg);
 
             function layout(svg) {
 
-                var ratio=(_value-_minValue)/(_maxValue-_minValue);
+                var ratio=(_value[0]-_minValue)/(_maxValue-_minValue);
                 var endAngle=Math.min(360*ratio,360);
                 endAngle=endAngle * Math.PI/180;
 
@@ -141,6 +159,20 @@ function radialProgress(parent) {
 
                 label.datum(Math.round(ratio*100));
                 label.transition().duration(_duration)
+                    .tween("text",labelTween);
+
+                if (_value[1]) {
+                    var ratio2=(_value[1]-_minValue)/(_maxValue-_minValue);
+                    var endAngle2=Math.min(360*ratio2,360);
+                    endAngle2=endAngle2 * Math.PI/180;
+
+                    path2.datum(endAngle2);
+                    path2.transition().delay(_duration).duration(_duration)
+                        .attrTween("d", arcTween2);
+                }
+
+                label2.datum(Math.round(ratio2*100));
+                label2.transition().duration(_duration)
                     .tween("text",labelTween);
 
             }
@@ -194,9 +226,9 @@ function radialProgress(parent) {
         return component;
     };
 
-    component.value = function (_) {
+    component.value = function (_, optionalValue) {
         if (!arguments.length) return _value;
-        _value = [_];
+        _value = !optionalValue ? [_] : [_, optionalValue];
         _selection.datum([_value]);
         return component;
     };
