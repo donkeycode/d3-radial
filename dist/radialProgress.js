@@ -116,11 +116,12 @@ function radialProgress(parent) {
                 .attr("transform", "translate(" + _width/2 + "," + _width/2 + ")")
                 .attr("d", _arc2);
 
+            var yLabel1 = !_value[1] ? _width/2+_fontSize/3 : _width/1.5+_fontSize/5;
             enter.append("g").attr("class", "labels");
             var label = svg.select(".labels").selectAll(".label").data(data);
             label.enter().append("text")
                 .attr("class","label")
-                .attr("y",_width/1.5+_fontSize/5)
+                .attr("y",yLabel1)
                 .attr("x",_width/2)
                 .attr("width",_width)
                 // .attr("x",(3*_fontSize/2))
@@ -243,6 +244,8 @@ function radialProgress(parent) {
     component.diameter = function(_) {
         if (!arguments.length) return _diameter;
         _diameter =  _;
+        __width = _;
+        __height = _;
         return component;
     };
 
