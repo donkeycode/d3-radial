@@ -41,6 +41,8 @@ function radialProgress(parent) {
         _minValue = 0,
         _maxValue = 100;
 
+    var _color = ["#000"];
+
     var  _currentArc= 0, _currentArc2= 0, _currentValue=0;
 
     var _arc = d3.svg.arc()
@@ -126,17 +128,24 @@ function radialProgress(parent) {
                 .attr("width",_width)
                 // .attr("x",(3*_fontSize/2))
                 .text(function (d) { return Math.round((_value[0]-_minValue)/(_maxValue-_minValue)*100) + "%" })
-                .style("font-size",_fontSize+"px");
+                .style({
+                    "font-size": _fontSize+"px",
+                    "fill": _color[0]
+                });
 
-            var label2 = svg.select(".labels").selectAll(".label").data(data);
-            label.enter().append("text")
-                .attr("class","label")
-                .attr("y",(_width/1.5+_fontSize/5)*.6)
-                .attr("x",_width/2)
-                .attr("width",_width)
-                // .attr("x",(3*_fontSize/2))
-                .text(function (d) { return Math.round((_value[0]-_minValue)/(_maxValue-_minValue)*100) + "%" })
-                .style("font-size",_fontSize+"px");
+            if (_value[1]) {
+                label.enter().append("text")
+                    .attr("class","label")
+                    .attr("y",(_width/1.5+_fontSize/5)*.6)
+                    .attr("x",_width/2)
+                    .attr("width",_width)
+                    // .attr("x",(3*_fontSize/2))
+                    .text(function (d) { return Math.round((_value[1]-_minValue)/(_maxValue-_minValue)*100) + "%" })
+                    .style({
+                        "font-size": _fontSize+"px",
+                        "fill": _color[1]
+                    });
+            }
 
             path.exit().transition().duration(500).attr("x",1000).remove();
 
@@ -158,10 +167,6 @@ function radialProgress(parent) {
                         .attrTween("d", arcTween2);
                 }
 
-                label.datum(Math.round(ratio*100));
-                label.transition().duration(_duration)
-                    .tween("text",labelTween);
-
                 if (_value[1]) {
                     var ratio2=(_value[1]-_minValue)/(_maxValue-_minValue);
                     var endAngle2=Math.min(360*ratio2,360);
@@ -171,11 +176,6 @@ function radialProgress(parent) {
                     path2.transition().delay(_duration).duration(_duration)
                         .attrTween("d", arcTween2);
                 }
-
-                label2.datum(Math.round(ratio2*100));
-                label2.transition().duration(_duration)
-                    .tween("text",labelTween);
-
             }
 
         });
@@ -205,6 +205,7 @@ function radialProgress(parent) {
         var i = d3.interpolate(_currentArc2, a);
 
         return function(t) {
+            _currentArc2=i(t);
             return _arc2.endAngle(i(t))();
         };
     }
@@ -264,6 +265,12 @@ function radialProgress(parent) {
     component.label = function(_) {
         if (!arguments.length) return _label;
         _label = _;
+        return component;
+    };
+
+    component.color = function (_, optionalColor) {
+        if (!arguments.length) return _color;
+        _color = !optionalColor ? [_] : [_, optionalColor];
         return component;
     };
 
